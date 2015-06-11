@@ -5,6 +5,7 @@
 import javax.swing.*;
 
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.awt.*;
 
 import javax.swing.*;
@@ -30,53 +31,82 @@ public class Borders extends JFrame
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		setLocation(0, 0);
 		setResizable(false);
-		BorPan p = new BorPan();
+		BordersPanel p = new BordersPanel();
 		setContentPane(p);
 		setVisible(true);
 		// set values (resizable, visible, etc.)
 	}
 }
 
-class BorPan extends JPanel
-{
-	private static boolean[][] bor;
+class BordersPanel extends JPanel
+{	// indexs 0 - 40 Asia
+	// indexs 41 - 82 Europe
+	// indexs 83 - 106 Americas
+	// indexs 107 - 154 Africa
+    final int FIRST_ASIA_COUNTRY = 0;
+	final int NUM_ASIA_COUNTRIES = 41;
+	final int LAST_ASIA_COUNTRY = 40;
+	
+	final int FIRST_EUROPE_COUNTRY = 41;
+	final int NUM_EUROPE_COUNTRIES = 42;
+	final int LAST_EUROPE_COUNTRY = 82;
+	
+	final int FIRST_AMERICA_COUNTRY = 83;
+	final int NUM_AMERICA_COUNTRIES = 24;
+	final int LAST_AMERICA_COUNTRY = 106;
+
+	final int FIRST_AFRICA_COUNTRY = 107;
+	final int NUM_AFRICA_COUNTRIES = 48;
+	final int LAST_AFRICA_COUNTRY = 154;
+
+	final int MAX_COUNTRIES = 155;
+	
+    boolean[][] borders;
 	// 2-d boolean array for bordering countries
-	private static int[][] loc;
-	// 2-d array for locations of countries (1st row x, 2nd row y)
-	Image[] igs;
+	int[][] loc;
+	Image [] images;
+	Image [] imagesSmall;
 	// 1-d image array for country images
-	private static String[] name;
+	String[] name;
 	// 1-d string array for country names
+	
 	// private static File location = new File("Locations.txt");
 	private static File border = new File("country borders2.csv");
 	private static File names = new File("country list.csv");
 	private static CardLayout cl;
 	private static JPanel p;
-	private static JPanel card1;
+	
+	private static TitleFrame card1;
 	private static SelectionFrame card2;
 	private static GamePanel card3;
-	private static Drag card4;
+	private static DragPanel card4;
 	private static JPanel card5;
-	int setCountry;
-	int qCountry;
+	
+	private static int setCountry; //test country
+	public int qCountry;  //question country
 
-	public BorPan()
+	public BordersPanel()
 	{
-		bor = new boolean[155][155];
-		name = new String[155];
+		borders = new boolean[MAX_COUNTRIES][MAX_COUNTRIES];
+		name = new String[MAX_COUNTRIES];
+		images = new Image[MAX_COUNTRIES];
+		imagesSmall = new Image[MAX_COUNTRIES];
 		setCountry = -1;
 		cl = new CardLayout();
 		p = new JPanel();
 		p.setLayout(cl);
-		card1 = new JPanel();// ///////////////////////////////////////////////////////////////////////////////////////
+		card1 = new TitleFrame();
 		card2 = new SelectionFrame();
 		card3 = new GamePanel();
-		card4 = new Drag();
-		card5 = new JPanel();// ///////////////////////////////////////////////////////////////////////////////////////
-		p.add(card1, "1");
-		p.add(card2, "2");
-		p.add(card3, "3");
+		card4 = new DragPanel();
+		card5 = new JPanel();// Placeholder
+		p.add(card1, "titleCard");
+		p.add(card2, "selectionCard");
+		p.add(card3, "gameCard");
+		p.add(card4, "dragCard");
+		p.add(card5, "spareCard");
 		add(p);
+		cl.show(p, "titleCard");
 	}
 
 	public void paintComponent(Graphics g)
@@ -84,134 +114,195 @@ class BorPan extends JPanel
 		super.paintComponent(g);
 	}
 
-	// CORRECT? Dummy for class
-	class Drag extends JPanel
+	class TitleFrame extends JPanel implements ActionListener
 	{
-		public Drag()
+		private JButton startButton;//global JButton
+		private boolean pressedstart;
+		
+		public TitleFrame()
 		{
+			setLayout(null);//null Layout 3 rows 1 column
+			pressedstart = false;
+			startButton = new JButton("START");
+			startButton.addActionListener(this);
+			//startButton.setBounds(0,330,600,100);
+			startButton.setBounds(30,300,520,100);
+			add(startButton);
+			//in the second box make a grid layout 2 rows 2 columns
+			//upper-left print Choose Difficulty
+			//upper-right make the JSlider with each of the 3 global variables being a difficulty level
+			//bottom-left print Choose Display
+			//bottom-right have 2 JCheckBostartButton's one labeled Show Image the other labeled Show Name
+			//In the third box 2 rows 1 column
+			// top box of the third write the directions
+			//bottom of the third box have a JButton labeled START that will take you to the main game
+	    }
+		public void actionPerformed(ActionEvent e)
+		{
+			if(pressedstart = true)//if start button pressed it takes to the game screen
+			{
+			     System.out.println("Start Button Pressed");
+			     cl.show(p, "selectionCard");
+			}
 		}
-	}
-
+		/*public void stateChanged(ChangeEvent q)
+		{
+			//if moved time increased or decreased************
+		}*/
+		public void paintComponent(Graphics g)
+		{
+			setBackground(Color.YELLOW);// will paint all the words in the correct place
+			super.paintComponent(g);
+			g.setFont(new Font("Times",Font.BOLD,50));//in the first box set font to plain and font size to 400 and write BORDERS;
+			g.drawString("Borders",200,50);
+			g.setFont(new Font("Times",Font.PLAIN,20));
+			//g.drawString("Use the Slider to adjust difficulty,",690,600);
+			//g.drawString("and select the checkbox's for your visual settings",690,610)
+			g.drawString("Welcome to Borders, a game about countries and their neighbors",40,80);
+			g.drawString("Instructions:",230,120);
+			g.setFont(new Font("Times",Font.PLAIN,15));
+		    g.drawString("You will be given a country at the top. Below that country you will given another one.",5,140);
+			g.drawString("To say the lower country does border the upper country, click the left mouse button.",5,160);
+			g.drawString("To say the lower country does NOT border the upper country, click the right mouse button.",5,180);
+			g.drawString("If you get an answer wrong, you will lose a life.",5,200);
+			g.drawString("You keep playing until you lose all your lives.",5,220);
+			g.setFont(new Font("Times",Font.PLAIN,20));
+			g.drawString("Good Luck",240,260);
+		}
+	} //TitleFrame
+		
 	class SelectionFrame extends JPanel implements ActionListener
 	{
-		JMenuItem america, europe, asia, africa, random;// 5 global JMenus
+		JMenuItem america, europe, asia, africa, random;// 5 global JMenuItems
 		JMenuItem[] countryItems;
-		JButton bb;// global JButton
+		
+		JButton playButton;// global JButton
 		boolean pressed;// boolean pressed
+		
 		boolean americaselected;// 4 selected booleans
 		boolean europeselected;
 		boolean asiaselected;
 		boolean africaselected;
-		JPanel p;
+		
+		JPanel p2;
 		JPanel newcardstack = new JPanel();
-		JPanel newcard1 = new JPanel();
-		JPanel newcard2 = new JPanel();
-		JPanel newcard3 = new JPanel();
-		JPanel newcard4 = new JPanel();
+		JPanel newcard1 = new MyPanel();
+		JPanel newcard2 = new MyPanel();
+		JPanel newcard3 = new MyPanel();
+		JPanel newcard4 = new MyPanel();
 		CardLayout newcl;
-		JLabel newlabel1 = new JLabel("America");
-		JLabel newlabel2 = new JLabel("Europe");
-		JLabel newlabel3 = new JLabel("Africa");
-		JLabel newlabel4 = new JLabel("Asia");
+		
+		class MyPanel extends JPanel implements ActionListener
+		{
+			public MyPanel()
+			{
+				super();
+			}
+			public void paintComponent(Graphics g)
+			{
+				super.paintComponent(g);
+			}
+			public void actionPerformed(ActionEvent e){}
+		}	
 
 		public SelectionFrame()
 		{
 			setArr();
 			// run setArr to add values to arrays
-			setBackground(Color.YELLOW);
+			
 			setLayout(new GridLayout(1, 2)); // setlayout Grid
-			p = new JPanel();
-			p.setLayout(new GridLayout(2, 1));
-			bb = new JButton("PLAY");// instastiate the new button called PLAY
-										// gl
-			bb.addActionListener(this);// add ActionListener
-			p.add(bb);// add the button
-			MyCanvas canvas = new MyCanvas();
-			setContentPane(canvas);
+			System.out.println("set grid layout #1");
+			p2 = new JPanel();
+			p2.setLayout(new GridLayout(2, 1));
+			System.out.println("set grid layout #2");
+			
+			playButton = new JButton("PLAY");// instantiate the new button called PLAY
+			//playButton.setBounds(30,300,520,100);							// gl
+			playButton.addActionListener(this);// add ActionListener
+			p2.add(playButton);// add the button
+			add(p2);
+			
 			JMenuBar menuBar = new JMenuBar();
-			setJMenuBar(menuBar);
-			JMenu CountryMenu = new JMenu("SELECT A COUNTRY");// make the JMenu
+			JMenu continentMenu = new JMenu("SELECT A CONTINENT");// make the JMenu
 																// labeled
 																// Select gl
-			countryItems = new JMenuItem[155];
+			countryItems = new MyJMI[MAX_COUNTRIES];
+			System.out.println("Made the JMI array");
 
-			america = new JMenuItem("America");// For the JMenuItems have all
-												// the continents except
-												// Antartica and Austrailia
-			europe = new JMenuItem("Europe");
-			asia = new JMenuItem("Asia");
-			africa = new JMenuItem("Africa");
+			america = new JMenuItem("America");// For the JMenuItems have all  											
+			europe = new JMenuItem("Europe");  // the continents except       
+			asia = new JMenuItem("Asia");      // Antartica and Austrailia    
+			africa = new JMenuItem("Africa");                                  
 			random = new JMenuItem("Random");
-			CountryMenu.add(america);
-			america.addActionListener(canvas);
-			CountryMenu.addSeparator();
+			menuBar.add(continentMenu);
+			
+			continentMenu.add(america);
+			america.addActionListener(this);
+			continentMenu.addSeparator();
 
-			CountryMenu.add(europe);
-			europe.addActionListener(canvas);
-			CountryMenu.addSeparator();
+			continentMenu.add(europe);
+			europe.addActionListener(this);
+			continentMenu.addSeparator();
 
-			CountryMenu.add(asia);
-			asia.addActionListener(canvas);
-			CountryMenu.addSeparator();
+			continentMenu.add(asia);
+			asia.addActionListener(this);
+			continentMenu.addSeparator();
 
-			CountryMenu.add(africa);
-			africa.addActionListener(canvas);
-			CountryMenu.addSeparator();
+			continentMenu.add(africa);
+			africa.addActionListener(this);
+			continentMenu.addSeparator();
 
-			CountryMenu.add(random);
-			random.addActionListener(canvas);
-			CountryMenu.addSeparator();
-
-			menuBar.add(CountryMenu);
-
+			continentMenu.add(random);
+			random.addActionListener(this);
+			continentMenu.addSeparator();
+			
 			JMenu asiaMenu = new JMenu("Choose a country in Asia");
-			int w = 0;
-			while (w < 41)
+			int w = 0;System.out.println("made it to before the while loop");
+			while (w <= LAST_ASIA_COUNTRY)
 			{
-				countryItems[w] = new JMenuItem(name[w]);
-				countryItems[w].addActionListner(this);
-				asiaMenu.add(countryItems[w]);
-				asiaMenu.addSeparator();
+				countryItems[w] = new MyJMI(name[w], w);
+				countryItems[w].addActionListener(this);
+				asiaMenu.add(countryItems[w]);				
+				w++;
 			}
 			asiaMenu.addActionListener(this);
-			menuBar.add(asiaMenu);
-
+			
 			JMenu europeMenu = new JMenu("Choose a country in Europe");
-			while (w < 83)
+			while (w <= LAST_EUROPE_COUNTRY)
 			{
-				countryItems[w] = new JMenuItem(name[w]);
-				countryItems[w].addActionListner(this);
+				countryItems[w] = new MyJMI(name[w], w);
+				countryItems[w].addActionListener(this);
 				europeMenu.add(countryItems[w]);
-				europeMenu.addSeparator();
+				w++;
 			}
 			europeMenu.addActionListener(this);
-			menuBar.add(europeMenu);
 
 			JMenu americaMenu = new JMenu("Choose a country in the Americas");
-			while (w < 107)
+			while (w <= LAST_AMERICA_COUNTRY)
 			{
-				countryItems[w] = new JMenuItem(name[w]);
-				countryItems[w].addActionListner(this);
+				countryItems[w] = new MyJMI(name[w], w);
+				countryItems[w].addActionListener(this);
 				americaMenu.add(countryItems[w]);
-				americaMenu.addSeparator();
+				w++;
 			}
 			americaMenu.addActionListener(this);
-			menuBar.add(americaMenu);
 
-			JMenu africaMenu = new JMenu("Choose a country in the Americas");
-			while (w < 155)
+			JMenu africaMenu = new JMenu("Choose a country in Africa");
+			while (w <= LAST_AFRICA_COUNTRY)
 			{
-				countryItems[w] = new JMenuItem(name[w]);
-				countryItems[w].addActionListner(this);
+				countryItems[w] = new MyJMI(name[w], w);
+				countryItems[w].addActionListener(this);
 				africaMenu.add(countryItems[w]);
-				africaMenu.addSeparator();
+				w++;
 			}
 			africaMenu.addActionListener(this);
-			menuBar.add(africaMenu);
+			menuBar.add(continentMenu);
+			p2.add(menuBar);
 			// //////
+			System.out.println("added continent menus");
 
 			newcl = new CardLayout();
-
+ 
 			newcardstack.setBackground(Color.YELLOW);
 			newcard1.setBackground(Color.YELLOW);
 			newcard2.setBackground(Color.YELLOW);
@@ -219,23 +310,27 @@ class BorPan extends JPanel
 			newcard4.setBackground(Color.YELLOW);
 			newcardstack.setLayout(newcl);
 			newcardstack.add(newcard1, "America");
-			newcard1.add(newlabel1);
-			newcard1.add(AmericaMenu);
+			newcard1.add(americaMenu);
 			newcardstack.add(newcard2, "Europe");
-			newcard2.add(newlabel2);
-			newcard2.add(EuropeMenu);
+			newcard2.add(europeMenu);
 			newcardstack.add(newcard3, "Africa");
-			newcard3.add(newlabel3);
-			newcard3.add(AfricaMenu);
+			newcard3.add(africaMenu);
 			newcardstack.add(newcard4, "Asia");
-			newcard4.add(newlabel4);
-			newcard4.add(AsiaMenu);
+			newcard4.add(asiaMenu);
 			add(newcardstack);// there is a cardlayout on the right or bottom
 								// box of the gridlayout so the Jmenu for the
 								// continent the user selects will pop up
 			// Depending on what continent the user selects
+			
+			System.out.println("Got through the SelectionFrame constructor");
 		}// Selection Frame
-
+		
+		public void paintComponent(Graphics g)
+		{
+			setBackground(Color.YELLOW);
+			super.paintComponent(g);
+		}
+		
 		public void setArr()
 		// setArr method
 		{
@@ -266,6 +361,8 @@ class BorPan extends JPanel
 				System.exit(1);
 			}
 			// new scanner for country names file
+			
+		    // Not yet implemented
 			/*
 			 * int locr = 0; int locc = 0; String locw = ""; while(s.hasNext())
 			 * { locw = s.next(); if(locw.equals("/")) { locr++; locc = 0; }
@@ -274,30 +371,38 @@ class BorPan extends JPanel
 			// add each word (next) to each index of the location array
 			// switch rows when a slash appears in the file
 
-			int borr = 0;
-			String borw = "";
+			for (int w = 0; w < MAX_COUNTRIES; w++)
+				for (int v = 0; v < MAX_COUNTRIES; v++)
+					borders[w][v] = false;
+			
+			int bordersRow = 0;
+			String bordersLine = "";
 			while (t.hasNextLine())
 			{
-				borw = t.nextLine();
+				bordersLine = t.nextLine();
 				int out = 0;
 				int in = 0;
-				while (in < borw.length())
+				while (in < bordersLine.length())
 				{
-					if (borw.charAt(in) == '1')
+					if (bordersLine.charAt(in) == '1')
 					{
-						bor[borr][out] = true;
-					} else if (borw.charAt(in) == ',')
+						borders[bordersRow][out] = true;
+					} else if (bordersLine.charAt(in) == ',')
 					{
 						out++;
 					}
 					in++;
 				}
-				borr++;
+				bordersRow++;
 			}
+			System.out.println("setted borders");			
+			// parse the csv(comma separated values) border data file
 			// get each number (or /) from boolean file as a string
 			// if the string is 1, then set value in array to true
 			// if the string is 0, then set value in array to false
 			// if the string is /, then go to next row in array.
+			
+			
 			int namc = 0;
 			while (u.hasNextLine())
 			{
@@ -305,75 +410,109 @@ class BorPan extends JPanel
 				namc++;
 			}
 			// add values from the country name file
-			for (int w = 0; w < name.length; w++)
+			System.out.println("setted name");			
+			
+			String wname = "";
+			for (int w = 0; w < MAX_COUNTRIES; w++)
 			{
-				igs[w] = Toolkit.getDefaultToolkit().getImage(name[w] + ".gif");
+					wname = name[w] + ".png";
+					images[w] = Toolkit.getDefaultToolkit().getImage(wname);
+					imagesSmall[w] = Toolkit.getDefaultToolkit().getImage("smallMaps/" +wname);
 			}
 			// use these name values to decide which image to get for each
 			// corresponding index in the image array.
+			System.out.println("setted images");
+			
 		}// SetArr
-
-		class MyCanvas extends JPanel implements ActionListener
-		{
-			public void actionPerformed(ActionEvent e)
+		
+		public void actionPerformed(ActionEvent e)
+		{ 
+			// ///////
+			if (e.getSource() == america)
+			{ 
+				
+				System.out.println("America");
+				newcl.show(newcardstack, "America");// each of the 4 boolean
+												// selected's correspond to												// a specific country
+			} 
+			else if (e.getSource() == europe)
 			{
-				// ///////
-				if (e.getSource() == america)
-				{
-					newcl.show(newcard1, "America");// each of the 4 boolean
-													// selected's correspond to
-													// a specific country
-				} else if (e.getSource() == europe)
-				{
-					newcl.show(newcard2, "Europe");
-				} else if (e.getSource() == africa)
-				{
-					newcl.show(newcard3, "Africa");
-				} else if (e.getSource() == asia)
-				{
-					newcl.show(newcard4, "Asia");
-				} else if (e.getSource() == random)
-				{
-					newcl.show(new JPanel());
-					// take to the main game page
-				} else if (e.getSource() != bb)
-					setCountry = countryItems.indexOf(e.getSource());
-				// ///////
+				System.out.println("europe");
+				newcl.show(newcardstack, "Europe");
+			} 
+			else if (e.getSource() == africa)
+			{	
+				newcl.show(newcardstack, "Africa");
+				
+			} 
+			else if (e.getSource() == asia)
+			{
+				newcl.show(newcardstack, "Asia");
+			} 
+			else if (e.getSource() == random)
+			{
+				// take to the main game page
+			} 
+			else if (e.getSource() != playButton) 
+			{
+				
+				System.out.println("Country");
+				setCountry = ((MyJMI) e.getSource()).index();
+		    }
+			// ///////
 
-				if (e.getSource() == bb)
-				{
-					if (setCountry != -1)
-						cl.next(p);
-					// if pressed == true take to the main game page
-				}
-				// ////////
-
-				// for()
-				// {//create a loop for if-else statements
-
-				// bunch of if-else statements depending on the continent
-				// selectesd in the JMenu
-
-				// then a nother JMenu comes up with the option of either having
-				// a random countryor the *user selects a country*
-				// the user clicks the play button and it takes them to the main
-				// game screen
-				// }
+			if (e.getSource() == playButton)
+			{
+				if (setCountry != -1)
+					cl.next(p);
+				// if pressed == true take to the main game page
 			}
-		}// MyCanvass
+			// ////////
+
+			// for()
+			// {//create a loop for if-else statements
+
+			// bunch of if-else statements depending on the continent
+			// selectesd in the JMenu
+
+			// then a nother JMenu comes up with the option of either having
+			// a random countryor the *user selects a country*
+			// the user clicks the play button and it takes them to the main
+			// game screen
+			// }
+		}
+		
+		class MyJMI extends JMenuItem
+		{
+			final int itemIndex;
+			public MyJMI(String name, int index)
+			{
+				super(name);
+				itemIndex = index;
+			}
+			public void addActionListener(ActionListener l)
+			{
+				super.addActionListener(l);
+			}
+			public int index()
+			{
+				return itemIndex;
+			}
+			
+		}
 	}// Selection Frame class
 
-	// indexs 1 - 41 Asia
-	// indexs 42 - 83 Europe
-	// indexs 84 - 107 'Muricas
-	// indexs 108 - 155 Africa
 	class GamePanel extends JPanel
 	// class GamePanel
 	{
+		final int MAX_LIVES = 7;
 		int life;
+		Life lf;
 		// variable life for number of lives (int)
+		
 		int scw;
 		// integer variable for country's order alphabetically (starts at 0)
+		
 		private boolean imgbool;
 		private boolean txtbool;
 
@@ -385,7 +524,7 @@ class BorPan extends JPanel
 			Header h = new Header();
 			add(h, BorderLayout.NORTH);
 			// north is Header panel
-			Gicon i = new Gicon();
+			GraphicsIcon i = new GraphicsIcon();
 			add(i, BorderLayout.CENTER);
 			// center is Icon panel
 		}
@@ -402,9 +541,10 @@ class BorPan extends JPanel
 			public Header()
 			// constructor
 			{
+				life = MAX_LIVES;
 				setLayout(new GridLayout(1, 3));
 				// set grid layout(3 columns)
-				Life lf = new Life();
+				lf = new Life();
 				add(lf);
 				// first panel is Life
 				HeaderIcon hi = new HeaderIcon();
@@ -426,10 +566,10 @@ class BorPan extends JPanel
 		// Life panel class
 		{
 			public Life()
+			// constructor
 			{
 			}
-
-			// constructor
+			
 			public void paintComponent(Graphics g)
 			// paintcomponent
 			{
@@ -437,22 +577,25 @@ class BorPan extends JPanel
 				super.paintComponent(g);
 				int[] heartTrix = new int[3];
 				int[] heartTriy = new int[3];
+				
 				for (int w = 0; w < life; w++)
 				{
+					
 					w *= 29;
-					g.fillArc(w + 4, 2, 10, 12, 0, 180);
-					g.fillArc(w + 14, 2, 10, 12, 0, 180);
-					heartTrix[0] = w + 4;
+					g.fillArc(w , 2, 10, 12, 0, 180);
+					g.fillArc(w + 10, 2, 10, 12, 0, 180);
+					heartTrix[0] = w;
 					heartTriy[0] = 7;
-					heartTrix[1] = w + 24;
+					heartTrix[1] = w + 20;
 					heartTriy[1] = 7;
-					heartTrix[2] = w + 14;
+					heartTrix[2] = w + 10;
 					heartTriy[2] = 17;
 					g.fillPolygon(heartTrix, heartTriy, 3);
 					w /= 29;
 
 				}
 				// use loop (counter is variable life) to draw hearts
+				// use coordinates of heart that was designed on graph paper
 			}
 		}
 
@@ -465,7 +608,7 @@ class BorPan extends JPanel
 				// ///////////////////
 				// only for test //
 				// ///////////////////
-				setCountry = 104; // (USA)
+//				setCountry = 104; // (USA)
 				imgbool = true;
 				txtbool = true;
 			}
@@ -474,20 +617,15 @@ class BorPan extends JPanel
 			// paintcomponent
 			{
 				setBackground(Color.WHITE);
-				super.paintComponent(g); // Changed 300s to 100s since only 3rd
-											// of screen !!!!
+				super.paintComponent(g); 
 
 				if (imgbool)
-					// ADD IMAGES!!!!
-					// g.drawImage(igs[setCountry],
-					// (300 - (50 / igs[setCountry].getHeight())
-					// * igs[setCountry].getWidth() / 2), 0,
-					// (50 / igs[setCountry].getHeight())
-					// * igs[setCountry].getWidth(), 50, this);
+					g.drawImage(imagesSmall[setCountry],50,10,100,100, this);
 
-					if (txtbool)
-						g.drawString(name[setCountry],
-								100 - name[setCountry].length() * 5, 50);
+				if (txtbool)
+					g.drawString(name[setCountry],
+							95 - name[setCountry].length() * 4, 15);
+				
 				// use setCountry variable (int) index in image and/or name
 				// arrays and draw them
 			}
@@ -506,8 +644,8 @@ class BorPan extends JPanel
 				setPreferredSize(new Dimension(100, 100));
 				mpbar = new JMenuBar();
 				mpm = new JMenu("Help");
-				mpiteml = new JMenuItem("LMB: Yes, it borders.");
-				mpitemr = new JMenuItem("RMB: No, they don't.");
+				mpiteml = new JMenuItem("Left Click: Yes, it borders.");
+				mpitemr = new JMenuItem("Right Click: No, it doesn't.");
 				// initialize menu bar and 2 items
 
 				mpbar.add(mpm);
@@ -527,17 +665,19 @@ class BorPan extends JPanel
 			}
 		}
 
-		class Gicon extends JPanel implements MouseListener
-		// Gicon panel class
+		class GraphicsIcon extends JPanel implements MouseListener
+		// GraphicsIcon panel class
 		{
+			int cnt = 0;
 			private Color c;
 			private boolean done;
 			private boolean resp;
 
-			public Gicon()
+			public GraphicsIcon()
 			// constructor
 			{
-				done = false;
+				setPreferredSize(new Dimension(320, 320));
+			    done = false;
 				resp = true;
 				// boolean done at false
 				c = Color.WHITE;
@@ -548,30 +688,90 @@ class BorPan extends JPanel
 				// ///////////////
 				// for test //
 				// ///////////////
-				qCountry = 87; // (Canada)
+				//qCountry = 87; // (Canada) 
 			}
 
 			public void paintComponent(Graphics g)
 			// paintcomponent
-			{
+			{	
+				//Countries on border of Europe and Asia
+				final int AZERBAIJAN    = 2;
+				final int CHINA         = 7;
+				final int GEORGIA       = 8;
+				final int KAZAKHSTAN    = 15;
+				final int MONOGOLIA     = 21;
+				final int NORTH_KOREA   = 24;
+				final int TURKEY        = 35;
+				final int BULGARIA      = 47;
+				final int GREECE        = 55;
+				final int RUSSIA        = 72;
+				
+				//Countries on border of Africa and Asia
+				final int ISRAEL        = 13;
+				final int EGYPT         = 119;
+				
+				super.paintComponent(g); 
 				setBackground(c);
 				// set background to c
 				g.setFont(new Font("Calibri", Font.PLAIN, 25));
-				qCountry = (int) (Math.random() * 155);
+				
+				if(setCountry == cnt)
+				{	
+					cnt++;
+					if (cnt >= MAX_COUNTRIES)
+						cnt = 0;
+				}	
+				else if(borders[setCountry][cnt])
+					qCountry = cnt;
+				else
+				{
+					qCountry = setCountry;
+					while (qCountry == setCountry)	
+					{
+						//Limit countries available to be qCountry by continent
+						if(setCountry == AZERBAIJAN  		
+								|| setCountry == CHINA  
+								|| setCountry == GEORGIA  
+								|| setCountry == KAZAKHSTAN 
+								|| setCountry == MONOGOLIA 
+								|| setCountry == NORTH_KOREA 
+								|| setCountry == TURKEY 
+								|| setCountry == BULGARIA 
+								|| setCountry == GREECE 
+								|| setCountry == RUSSIA)
+							qCountry = (int)(Math.random()*(NUM_ASIA_COUNTRIES + NUM_EUROPE_COUNTRIES));
+																					//Europe or Asia
+						else if(setCountry == ISRAEL     
+								|| setCountry == EGYPT)
+							qCountry = (int)(Math.random()*(NUM_ASIA_COUNTRIES + NUM_AFRICA_COUNTRIES)
+																	+ FIRST_AFRICA_COUNTRY)%MAX_COUNTRIES;
+																					 //Asia or Africa
+						else if(setCountry <= LAST_ASIA_COUNTRY)
+							qCountry = (int)(Math.random()*NUM_ASIA_COUNTRIES);			     //Asia
+						else if(setCountry <= LAST_EUROPE_COUNTRY)
+							qCountry = (int)(Math.random()*NUM_EUROPE_COUNTRIES
+																	+ FIRST_EUROPE_COUNTRY); //Europe
+						else if(setCountry <= LAST_AMERICA_COUNTRY)
+							qCountry = (int)(Math.random()*NUM_AMERICA_COUNTRIES 
+																	+ FIRST_AMERICA_COUNTRY);//Americas
+						else if(setCountry <= LAST_AFRICA_COUNTRY)
+							qCountry = (int)(Math.random()*NUM_AFRICA_COUNTRIES
+																	+ FIRST_AFRICA_COUNTRY);  //Africa
+					}	
+				}	
+				cnt++;
+				if (cnt >= MAX_COUNTRIES)
+					cnt = 0;
+				
 				if (imgbool)
-					// ADD IMAGES!!!!
-					// g.drawImage(
-					// igs[qCountry],
-					// 300 - 145 / igs[qCountry].getHeight()
-					// * igs[qCountry].getWidth(),
-					// 10,
-					// 290 / igs[qCountry].getHeight()
-					// * igs[qCountry].getWidth(), 290, this);
-					if (txtbool)
-						g.drawString(
-								name[qCountry],
+				   g.drawImage(images[qCountry], 155,  0,  270,  270,  this);
+				
+				if (txtbool)	
+					g.drawString(name[qCountry],
 								300 - (int) (12.5 / 2 * name[qCountry].length()),
-								312);
+								290);
+
+				
 				// use qCountry variable (int) index in image and/or name arrays
 				// and draw them
 				// set timer to difficulty level variable
@@ -580,17 +780,21 @@ class BorPan extends JPanel
 			public void mouseClicked(MouseEvent e)
 			// mouse clicked event
 			{
-				if (e.getX() > 150 && e.getX() < 450 && e.getY() > 100
-						&& e.getY() < 225)
+				final int LEFT_CLICK = 1;
+				final int RIGHT_CLICK = 3;
+				
+				//System.out.print("GraphicsIcon mouse event");
+					if (e.getX() > 0 && e.getX() < 650 && e.getY() > 0
+							&& e.getY() < 400)
 				// if within a certain center square...
 				{
-					if (e.getButton() == 1)
+					if (e.getButton() == LEFT_CLICK)
 						resp = true;
 					// if left click, set value resp to true
-					if (e.getButton() == 3)
+					if (e.getButton() == RIGHT_CLICK)
 						resp = false;
 					// if right click, set value resp to false
-					if (resp == bor[setCountry][qCountry])
+					if (resp == borders[setCountry][qCountry])
 					{
 						c = Color.GREEN;
 						done = true;
@@ -601,9 +805,15 @@ class BorPan extends JPanel
 					{
 						c = Color.RED;
 						life--;
+						if (life == 0)
+						{
+							cl.show(p, "selectionCard");
+							life = MAX_LIVES;
+						}
+						lf.repaint();
 						done = true;
 					}
-					if (bor[setCountry][qCountry])
+					if (borders[setCountry][qCountry])
 						scw++;
 					// if resp is not equal, set color c to red, decrement # of
 					// lives, done is true
@@ -615,21 +825,36 @@ class BorPan extends JPanel
 
 			public void mousePressed(MouseEvent e)
 			{
+				//System.out.print("mousePressed");
 			}
 
 			public void mouseEntered(MouseEvent e)
 			{
-			}
+				//System.out.print("mouseEntered");
+		    }
 
 			public void mouseExited(MouseEvent e)
 			{
-			}
+				//System.out.print("mouseExited");
+		    }
 
 			public void mouseReleased(MouseEvent e)
 			{
-			}
+				//System.out.print("mouseReleased");
+		    }
+			
 			// timer task sets color c to red and decrements # of lives, sets
 			// done to true
 		}
 	}
+	
+	//  Not yet implemented
+	class DragPanel extends JPanel
+	{
+		public DragPanel()
+		{
+		}
+	}
+
+
 }
