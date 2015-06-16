@@ -16,6 +16,30 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".DisplayInstructionsActivity"
+            android:label="@string/title_activity_display_instructions"
+            android:parentActivityName=".MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.april.borders.MainActivity" />
+        </activity>
+        <activity
+            android:name=".ContinentSelectActivity"
+            android:label="@string/title_activity_continent_select"
+            android:parentActivityName=".MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.april.borders.MainActivity" />
+        </activity>
+        <activity
+            android:name=".ContinentMenu"
+            android:label="@string/title_activity_continent_menu"
+            android:parentActivityName=".ContinentSelectActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.april.borders.ContinentSelectActivity" />
+        </activity>
     </application>
 
 </manifest>
